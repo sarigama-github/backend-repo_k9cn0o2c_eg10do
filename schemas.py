@@ -12,7 +12,7 @@ Model name is converted to lowercase for the collection name:
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
 # Example schemas (replace with your own):
 
@@ -38,11 +38,32 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+# Sudoku collections
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Gamestate(BaseModel):
+    """
+    Active Sudoku game state per device
+    Collection name: "gamestate"
+    """
+    device_id: str = Field(..., description="Anonymous device identifier")
+    difficulty: str = Field(..., description="easy | medium | hard")
+    puzzle: List[List[int]] = Field(..., description="Initial puzzle grid with 0 for empty")
+    solution: List[List[int]] = Field(..., description="Solved grid")
+    current: List[List[int]] = Field(..., description="Current grid values (0 for empty)")
+    fixed: List[List[bool]] = Field(..., description="Fixed given cells")
+    notes: List[List[List[int]]] = Field(..., description="Candidates per cell")
+    mistakes: int = Field(0, ge=0)
+    elapsed_seconds: int = Field(0, ge=0)
+    is_completed: bool = Field(False)
+
+class Stats(BaseModel):
+    """
+    Gameplay statistics per device
+    Collection name: "stats"
+    """
+    device_id: str = Field(...)
+    games_played: int = Field(0, ge=0)
+    games_won: int = Field(0, ge=0)
+    best_time_seconds: Optional[int] = Field(None, ge=0)
+    last_difficulty: Optional[str] = Field(None)
+    total_mistakes: int = Field(0, ge=0)
